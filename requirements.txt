@@ -1,0 +1,4 @@
+black
+Brotli
+fonttools
+isort
