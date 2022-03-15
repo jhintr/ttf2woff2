@@ -1,31 +1,30 @@
 #!/usr/bin/env python
 import json
 import os
-import sys
+from datetime import datetime
 from multiprocessing import Pool
+from pathlib import Path
 
 from fontTools.subset import main
 
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-TTF_FILE = os.path.join(ROOT_DIR, "LXGWWenKai-Light.ttf")
-
-RELEASE_DIR = os.path.join(ROOT_DIR, "release")
-
-FONT_DIR = os.path.join(RELEASE_DIR, "woff2")
-
-FONT_FAMILY = "LXGW WenKai"
-
-SUBSET_PREFIX = "lxgw-wenkai-light-subset"
-
-CSS_FILENAME = "lxgw-wenkai-light.css"
 
 BASE_UNICODE = "unicode.json"
 
 EXTEND_UNICODE = "unicode_ex.json"
 
 
-def get_unicode_range(all_subset):
+def get_unicode_range(all_subset: bool):
+    """Read unicode range from `.json` file.
+
+    Parameters:
+        all_subset: dealing with just `unicode_ex.json` or not
+
+    Returns:
+        tuple of css_range and task_range
+    """
+
     css_range = {}
     task_range = {}
     with open(BASE_UNICODE) as f1, open(EXTEND_UNICODE) as f2:
@@ -36,10 +35,23 @@ def get_unicode_range(all_subset):
     return css_range, task_range
 
 
-def get_font_face(part, unicode, subset_filename):
-    return f"""/* {FONT_FAMILY} [{part}] */
+def get_font_face(font_family: str, part: str, unicode: str, subset_filename: str):
+    """Format @font-face string.
+
+    Parameters:
+        font_family: Font family
+        part: subset part
+        unicode: unicode range of the part
+        subset_filename: woff2 filename of the subset
+
+    Returns:
+
+        css string of @font-face.
+    """
+
+    return f"""/* {font_family} [{part}] */
 @font-face {{
-    font-family: '{FONT_FAMILY}';
+    font-family: '{font_family.split("-")[0]}';
     font-style: normal;
     font-weight: 300;
     font-display: swap;
@@ -49,21 +61,37 @@ def get_font_face(part, unicode, subset_filename):
 """
 
 
-def build_package(all_subset):
+def build_package(ttf: str, all_subset: bool = False):
+    """Build woff2 package with its css file.
+
+    Parameters:
+        ttf: ttf filename
+        all_subset: dealing with just `unicode_ex.json` or not
+    """
+
+    font_family_weight = ttf.split(".")[0]
+
+    font_family = font_family_weight.split("-")[0]
+
+    dist_dir = os.path.join(ROOT_DIR, "dist", font_family)
+    woff2_dir = os.path.join(dist_dir, "woff2")
+    Path(woff2_dir).mkdir(parents=True, exist_ok=True)
+
+    css_filename = f"{font_family_weight.lower()}.css"
+
     css_range, task_range = get_unicode_range(all_subset)
     tasks = []
-    css_list = []
+    css_list = [f"/* Last update: {datetime.now()} */\n\n"]
 
     for part, unicode in css_range.items():
-        subset_filename = f"{SUBSET_PREFIX}-{part}.woff2"
-        output_filename = os.path.join(FONT_DIR, subset_filename)
+        subset_filename = f"{font_family_weight.lower()}-subset-{part}.woff2"
+        output_filename = os.path.join(woff2_dir, subset_filename)
 
-        # subset css
-        css_list.append(get_font_face(part, unicode, subset_filename))
+        css_list.append(get_font_face(font_family_weight, part, unicode, subset_filename))
 
         if part in task_range:
             args = [
-                TTF_FILE,
+                ttf,
                 f"--output-file={output_filename}",
                 "--flavor=woff2",
                 f"--unicodes={unicode}",
@@ -72,7 +100,7 @@ def build_package(all_subset):
             tasks.append((subset_filename, args))
 
     # save css file
-    css_file = os.path.join(RELEASE_DIR, CSS_FILENAME)
+    css_file = os.path.join(dist_dir, css_filename)
     with open(css_file, "w", newline="\n") as f:
         f.write("".join(css_list))
 
@@ -88,8 +116,21 @@ def subset_worker(task):
 
 
 if __name__ == "__main__":
-    arg = sys.argv[1] if sys.argv[1:] else None
-    if arg in ["-a", "--all"]:
-        build_package(all_subset=True)
-    else:
-        build_package(all_subset=False)
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Build subsets of woff2 from ttf.")
+
+    parser.add_argument(
+        "ttf",
+        type=str,
+        help="specify ttf filename",
+    )
+    parser.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="deal with all unicode_ranges",
+    )
+    args = parser.parse_args()
+
+    build_package(args.ttf, args.all)
