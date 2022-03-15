@@ -2,7 +2,7 @@
 
 # The result of `supplement_range()` shows that
 # every subset of `unicode.json` has about 138 ~ 189 chars.
-# So I group every 200 chars of missing cjk into a new subset,
+# So I group every 150 chars of missing cjk into a new subset,
 # which prefixed with `ex`.
 
 import json
@@ -66,7 +66,7 @@ def make_ex_json():
 
     missing_cjk = get_missing_cjk()
     missing_dict = {}
-    range_num = 200
+    range_num = 150
     count = 0
     while count * range_num < len(missing_cjk):
         _cjk = missing_cjk[count * range_num : (count + 1) * range_num]
