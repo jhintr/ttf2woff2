@@ -12,7 +12,9 @@ ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 BASE_UNICODE = "unicode.json"
 
-EXTEND_UNICODE = "unicode_ex.json"
+EXTEND_CJK = "unicode_ex.json"
+
+EXTEND_LATIN = "unicode_latin.json"
 
 
 def get_unicode_range(all_subset: bool):
@@ -27,19 +29,20 @@ def get_unicode_range(all_subset: bool):
 
     css_range = {}
     task_range = {}
-    with open(BASE_UNICODE) as f1, open(EXTEND_UNICODE) as f2:
+    with open(BASE_UNICODE) as f1, open(EXTEND_CJK) as f2, open(EXTEND_LATIN) as f3:
         r1 = json.load(f1)
         r2 = json.load(f2)
-        css_range = {**r1, **r2}
-        task_range = css_range if all_subset else r2
+        r3 = json.load(f3)
+        css_range = {**r1, **r2, **r3}
+        task_range = css_range if all_subset else {**r2, **r3}
     return css_range, task_range
 
 
-def get_font_face(font_family: str, part: str, unicode: str, subset_filename: str):
+def get_font_face(font_name: str, part: str, unicode: str, subset_filename: str):
     """Format @font-face string.
 
     Parameters:
-        font_family: Font family
+        font_name: Font name
         part: subset part
         unicode: unicode range of the part
         subset_filename: woff2 filename of the subset
@@ -49,9 +52,9 @@ def get_font_face(font_family: str, part: str, unicode: str, subset_filename: st
         css string of @font-face.
     """
 
-    return f"""/* {font_family} [{part}] */
+    return f"""/* {font_name} [{part}] */
 @font-face {{
-    font-family: '{font_family.split("-")[0]}';
+    font-family: '{font_name.split("-")[0]}';
     font-style: normal;
     font-weight: 300;
     font-display: swap;
@@ -69,25 +72,23 @@ def build_package(ttf: str, all_subset: bool = False):
         all_subset: dealing with just `unicode_ex.json` or not
     """
 
-    font_family_weight = ttf.split(".")[0]
+    font_name = ttf.replace(".ttf", "")
 
-    font_family = font_family_weight.split("-")[0]
-
-    dist_dir = os.path.join(ROOT_DIR, "dist", font_family)
+    dist_dir = os.path.join(ROOT_DIR, "dist")
     woff2_dir = os.path.join(dist_dir, "woff2")
     Path(woff2_dir).mkdir(parents=True, exist_ok=True)
 
-    css_filename = f"{font_family_weight.lower()}.css"
+    css_filename = f"{font_name.lower()}.css"
 
     css_range, task_range = get_unicode_range(all_subset)
     tasks = []
     css_list = [f"/* Last update: {datetime.now()} */\n\n"]
 
     for part, unicode in css_range.items():
-        subset_filename = f"{font_family_weight.lower()}-subset-{part}.woff2"
+        subset_filename = f"{font_name.lower()}-subset-{part}.woff2"
         output_filename = os.path.join(woff2_dir, subset_filename)
 
-        css_list.append(get_font_face(font_family_weight, part, unicode, subset_filename))
+        css_list.append(get_font_face(font_name, part, unicode, subset_filename))
 
         if part in task_range:
             args = [
