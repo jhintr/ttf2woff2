@@ -14,7 +14,7 @@ BASE_UNICODE = "unicode.json"
 
 EXTEND_CJK = "unicode_ex.json"
 
-EXTEND_LATIN = "unicode_latin.json"
+EXTEND_MANUAL = "unicode_manual.json"
 
 
 def get_unicode_range(all_subset: bool):
@@ -29,12 +29,12 @@ def get_unicode_range(all_subset: bool):
 
     css_range = {}
     task_range = {}
-    with open(BASE_UNICODE) as f1, open(EXTEND_CJK) as f2, open(EXTEND_LATIN) as f3:
+    with open(BASE_UNICODE) as f1, open(EXTEND_CJK) as f2, open(EXTEND_MANUAL) as f3:
         r1 = json.load(f1)
         r2 = json.load(f2)
         r3 = json.load(f3)
         css_range = {**r1, **r2, **r3}
-        task_range = css_range if all_subset else {**r2, **r3}
+        task_range = css_range if all_subset else r3
     return css_range, task_range
 
 
