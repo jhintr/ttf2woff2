@@ -1,6 +1,6 @@
 {
   "name": "@jhintr/lxgw-wenkai-webfont",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A webfont package for the LXGW-WenKai typeface",
   "main": "style.css",
   "scripts": {
