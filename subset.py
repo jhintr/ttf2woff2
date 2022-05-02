@@ -14,28 +14,26 @@ BASE_UNICODE = "unicode.json"
 
 EXTEND_CJK = "unicode_ex.json"
 
-EXTEND_MANUAL = "unicode_manual.json"
+EXTEND_MANUAL = "unicode_ex_manual.json"
 
 
-def get_unicode_range(all_subset: bool):
+def get_unicode_range(all_chars: bool):
     """Read unicode range from `.json` file.
 
     Parameters:
-        all_subset: dealing with just `unicode_ex.json` or not
+        all_chars: if False, only dealing with basic latin and sanskrit letters
 
     Returns:
-        tuple of css_range and task_range
+        tuple of css_range
     """
 
     css_range = {}
-    task_range = {}
     with open(BASE_UNICODE) as f1, open(EXTEND_CJK) as f2, open(EXTEND_MANUAL) as f3:
         r1 = json.load(f1)
         r2 = json.load(f2)
         r3 = json.load(f3)
         css_range = {**r1, **r2, **r3}
-        task_range = css_range if all_subset else r3
-    return css_range, task_range
+    return css_range
 
 
 def get_font_face(font_name: str, part: str, unicode: str, subset_filename: str):
@@ -48,7 +46,6 @@ def get_font_face(font_name: str, part: str, unicode: str, subset_filename: str)
         subset_filename: woff2 filename of the subset
 
     Returns:
-
         css string of @font-face.
     """
 
@@ -64,12 +61,12 @@ def get_font_face(font_name: str, part: str, unicode: str, subset_filename: str)
 """
 
 
-def build_package(ttf: str, all_subset: bool = False):
+def build_package(ttf: str, all_chars: bool = False):
     """Build woff2 package with its css file.
 
     Parameters:
         ttf: ttf filename
-        all_subset: dealing with just `unicode_ex.json` or not
+        all_chars: if False, only dealing with basic latin and sanskrit letters
     """
 
     font_name = ttf.replace(".ttf", "")
@@ -80,7 +77,7 @@ def build_package(ttf: str, all_subset: bool = False):
 
     css_filename = f"{font_name.lower()}.css"
 
-    css_range, task_range = get_unicode_range(all_subset)
+    css_range = get_unicode_range(all_chars)
     tasks = []
     css_list = [f"/* Last update: {datetime.now()} */\n\n"]
 
@@ -90,15 +87,14 @@ def build_package(ttf: str, all_subset: bool = False):
 
         css_list.append(get_font_face(font_name, part, unicode, subset_filename))
 
-        if part in task_range:
-            args = [
-                ttf,
-                f"--output-file={output_filename}",
-                "--flavor=woff2",
-                f"--unicodes={unicode}",
-                "--passthrough-tables",
-            ]
-            tasks.append((subset_filename, args))
+        args = [
+            ttf,
+            f"--output-file={output_filename}",
+            "--flavor=woff2",
+            f"--unicodes={unicode}",
+            "--passthrough-tables",
+        ]
+        tasks.append((subset_filename, args))
 
     # save css file
     css_file = os.path.join(dist_dir, css_filename)
@@ -130,7 +126,7 @@ if __name__ == "__main__":
         "-a",
         "--all",
         action="store_true",
-        help="deal with all unicode_ranges",
+        help="deal with all chars",
     )
     args = parser.parse_args()
 
