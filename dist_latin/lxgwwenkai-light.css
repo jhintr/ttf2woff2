@@ -1,0 +1,38 @@
+/* Last update: 2022-05-02 09:47:56.640034 */
+
+/* LXGWWenKai-Light [basic_latin] */
+@font-face {
+    font-family: 'LXGWWenKai';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('./woff2/lxgwwenkai-light-subset-basic_latin.woff2') format('woff2');
+    unicode-range: U+0020-007F
+}
+/* LXGWWenKai-Light [latin-1_supplement] */
+@font-face {
+    font-family: 'LXGWWenKai';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('./woff2/lxgwwenkai-light-subset-latin-1_supplement.woff2') format('woff2');
+    unicode-range: U+00D1, U+00F1
+}
+/* LXGWWenKai-Light [latin_extended-a] */
+@font-face {
+    font-family: 'LXGWWenKai';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('./woff2/lxgwwenkai-light-subset-latin_extended-a.woff2') format('woff2');
+    unicode-range: U+0100-0101, U+012A-012B, U+015A-015B, U+016A-016B
+}
+/* LXGWWenKai-Light [latin_extended_additional] */
+@font-face {
+    font-family: 'LXGWWenKai';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('./woff2/lxgwwenkai-light-subset-latin_extended_additional.woff2') format('woff2');
+    unicode-range: U+1E0C-1E0D, U+1E36-1E37, U+1E40-1E47, U+1E5A-1E5D, U+1E62-1E63, U+1E6C-1E6D
+}

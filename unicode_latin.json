@@ -1,0 +1,6 @@
+{
+    "Basic_Latin": "U+0020-007F",
+    "Latin-1_Supplement": "U+00D1, U+00F1",
+    "Latin_Extended-A": "U+0100-0101, U+012A-012B, U+015A-015B, U+016A-016B",
+    "Latin_Extended_Additional": "U+1E0C-1E0D, U+1E36-1E37, U+1E40-1E47, U+1E5A-1E5D, U+1E62-1E63, U+1E6C-1E6D"
+}

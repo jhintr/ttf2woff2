@@ -1,0 +1,25 @@
+{
+  "name": "@jhintr/lxgw-wenkai-webfont-latin",
+  "version": "1.0.1",
+  "description": "A webfont package for the LXGW-WenKai typeface",
+  "main": "style.css",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhintr/ttf2woff2.git"
+  },
+  "keywords": [
+    "LXGW WenKai",
+    "webfont",
+    "woff2",
+    "css"
+  ],
+  "author": "Zhi Shao <jhintr@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jhintr/ttf2woff2/issues"
+  },
+  "homepage": "https://github.com/jhintr/ttf2woff2#readme"
+}

@@ -16,6 +16,8 @@ EXTEND_CJK = "unicode_ex.json"
 
 EXTEND_MANUAL = "unicode_ex_manual.json"
 
+LATIN_UNICODE = "unicode_latin.json"
+
 
 def get_unicode_range(all_chars: bool):
     """Read unicode range from `.json` file.
@@ -28,11 +30,15 @@ def get_unicode_range(all_chars: bool):
     """
 
     css_range = {}
-    with open(BASE_UNICODE) as f1, open(EXTEND_CJK) as f2, open(EXTEND_MANUAL) as f3:
-        r1 = json.load(f1)
-        r2 = json.load(f2)
-        r3 = json.load(f3)
-        css_range = {**r1, **r2, **r3}
+    if all_chars:
+        with open(BASE_UNICODE) as f1, open(EXTEND_CJK) as f2, open(EXTEND_MANUAL) as f3:
+            r1 = json.load(f1)
+            r2 = json.load(f2)
+            r3 = json.load(f3)
+            css_range = {**r1, **r2, **r3}
+    else:
+        with open(LATIN_UNICODE) as f:
+            css_range = json.load(f)
     return css_range
 
 
@@ -71,7 +77,8 @@ def build_package(ttf: str, all_chars: bool = False):
 
     font_name = ttf.replace(".ttf", "")
 
-    dist_dir = os.path.join(ROOT_DIR, "dist")
+    dist_dir = "dist" if all_chars else "dist_latin"
+    dist_dir = os.path.join(ROOT_DIR, dist_dir)
     woff2_dir = os.path.join(dist_dir, "woff2")
     Path(woff2_dir).mkdir(parents=True, exist_ok=True)
 
@@ -82,10 +89,10 @@ def build_package(ttf: str, all_chars: bool = False):
     css_list = [f"/* Last update: {datetime.now()} */\n\n"]
 
     for part, unicode in css_range.items():
-        subset_filename = f"{font_name.lower()}-subset-{part}.woff2"
+        subset_filename = f"{font_name.lower()}-subset-{part.lower()}.woff2"
         output_filename = os.path.join(woff2_dir, subset_filename)
 
-        css_list.append(get_font_face(font_name, part, unicode, subset_filename))
+        css_list.append(get_font_face(font_name, part.lower(), unicode, subset_filename))
 
         args = [
             ttf,
